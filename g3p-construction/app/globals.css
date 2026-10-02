@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --font-display: "Fraunces Variable", Georgia, serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper-50 text-ink-950 antialiased;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background-color: #b8863c;
+  color: #faf9f7;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* Visible focus ring for keyboard users, without a default ugly outline on mouse clicks */
+:focus-visible {
+  outline: 2px solid #b8863c;
+  outline-offset: 2px;
+}
