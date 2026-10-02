@@ -1,0 +1,49 @@
+// G3P Construction — database schema
+// Deployed against Neon (serverless Postgres).
+
+// Uses the Neon serverless driver adapter (no native query-engine binary to
+// download at build time — works cleanly on Railway and other restricted
+// build environments). See src/lib/prisma.ts for the client setup.
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A lead submitted through the "Request a Project Estimate" form.
+model EstimateRequest {
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+
+  name             String
+  email            String
+  phone            String
+  projectAddress   String?
+  zip              String?
+  projectType      String
+  approxBudget     String?
+  desiredStart     String?
+  description      String?
+
+  // free-form source tracking (utm params, referring page)
+  source           String?
+  utmSource        String?
+  utmMedium        String?
+  utmCampaign      String?
+
+  status           LeadStatus @default(NEW)
+  notes            String?
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  ESTIMATE_SENT
+  WON
+  LOST
+}
