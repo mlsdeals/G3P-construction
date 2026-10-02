@@ -12,7 +12,7 @@ function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error(
-      "DATABASE_URL is not set. Add your Neon connection string to .env (see .env.example) before the estimate form or any database access can work."
+      "DATABASE_URL is not set. Add your Neon connection string as an environment variable before the estimate form or any database access can work."
     );
   }
   const adapter = new PrismaNeon({ connectionString });
@@ -22,6 +22,20 @@ function createPrismaClient() {
   });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+function getPrismaClient(): PrismaClient {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+  return globalForPrisma.prisma;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Lazy proxy: merely importing `prisma` never reads DATABASE_URL or builds a
+// client — the client is only created the first time a property on it is
+// actually touched, at request time. This is what lets `next build` import
+// API route modules (to collect their metadata) without a database
+// configured yet; only a real request at runtime needs DATABASE_URL set.
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getPrismaClient() as object, prop, receiver);
+  },
+});
